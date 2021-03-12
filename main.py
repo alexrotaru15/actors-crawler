@@ -40,10 +40,14 @@ def get_movie_links():
 
 movie_links = get_movie_links()
 actors_dict = {}
+directors_dict = {}
 
 for link in movie_links:
     response = requests.get(link)
     soup = BeautifulSoup(response.text, 'html.parser')
+    director_exists = soup.select_one(
+        '.summary_text+ .credit_summary_item .inline')
+
     try:
         movie_data = soup.select_one('.originalTitle')
         movie_name = movie_data.text.replace(
@@ -54,6 +58,18 @@ for link in movie_links:
     except AttributeError:
         movie_data = soup.select_one('h1')
         movie = movie_data.text.replace(u'\xa0', u' ').strip()
+
+    if director_exists.text == 'Director:':
+        director_data = soup.select_one(
+            '.summary_text+ .credit_summary_item a')
+        director_name = director_data.text
+        if director_name in directors_dict:
+            directors_dict[director_name]['movies'] += 1
+            directors_dict[director_name]['movies_list'].append(movie)
+        else:
+            directors_dict[director_name] = {
+                'movies': 1, 'movies_list': [movie]}
+
     print(f"Getting data from {movie_links.index(link) + 1}. {movie}")
     actors_data = soup.select('.primary_photo+ td')
     actors = [actor.text.replace('\n', '').strip() for actor in actors_data]
@@ -72,6 +88,9 @@ def get_year(movie):
 for actor in actors_dict:
     actors_dict[actor]['movies_list'].sort(key=get_year)
 
+for director in directors_dict:
+    directors_dict[director]['movies_list'].sort(key=get_year)
+
 
 wb = Workbook()
 dest_filename = 'actors.xlsx'
@@ -81,5 +100,12 @@ ws.append(['Actor', 'Movies Number', 'Movies List'])
 for (actor, values) in actors_dict.items():
     ws.append([actor, values['movies'], str(values['movies_list']
                                             ).replace('[', '').replace(']', '').replace("'", '')])
+
+
+ws2 = wb.create_sheet(title='Directors')
+ws2.append(['Director', 'Movies', 'Movies List'])
+for (director, values) in directors_dict.items():
+    ws2.append([director, values['movies'], str(values['movies_list']
+                                                ).replace('[', '').replace(']', '').replace("'", '')])
 
 wb.save(filename=dest_filename)
