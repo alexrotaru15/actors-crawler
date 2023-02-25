@@ -2,4 +2,6 @@
 /.idea
 /.vscode
 /venv
-/.old
+/old
+/__pycache__
+actors.xlsx

@@ -1,5 +1,5 @@
-Scrape viewed movies from imdb personal account to identify the most viewed actors and directors.
+Scrape your watched movies from the IMDB profile.
 
-Using Selenium we access the first page with rated movies on a personal IMDB account and scrape through all the pages to find the individual links for each movie. Looping through the list of links, we will access each one of them and get the title, year and the main actors from the page (not the cast page).
+Create the .env file and add the variable FIRST_ENTRY with the url from 'Your Ratings' section from IMDB.
 
-We can write the data into an excel file using openpyxl. The file will have 3 columns: actor name, number of movies, the movie list in a chronological order.
+Double click the run_script.bat to run the script.
